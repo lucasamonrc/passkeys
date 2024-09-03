@@ -1,12 +1,20 @@
+CREATE TABLE `challenges` (
+	`value` text PRIMARY KEY NOT NULL,
+	`userId` text,
+	FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `credentials` (
 	`id` text PRIMARY KEY NOT NULL,
-	`bytes` blob NOT NULL,
-	`userId` integer,
+	`credentialPublicKey` blob NOT NULL,
+	`counter` integer NOT NULL,
+	`transports` blob,
+	`userId` text,
 	FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
 	`name` text NOT NULL
 );

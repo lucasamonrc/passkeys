@@ -1,9 +1,46 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b5ed9464-819c-4bc2-85fb-d4d2b82935c9",
+  "id": "f9afb4aa-ead0-4af3-b16d-6e5983287fa5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "challenges": {
+      "name": "challenges",
+      "columns": {
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "challenges_userId_users_id_fk": {
+          "name": "challenges_userId_users_id_fk",
+          "tableFrom": "challenges",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "credentials": {
       "name": "credentials",
       "columns": {
@@ -14,16 +51,30 @@
           "notNull": true,
           "autoincrement": false
         },
-        "bytes": {
-          "name": "bytes",
+        "credentialPublicKey": {
+          "name": "credentialPublicKey",
           "type": "blob",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
+        "counter": {
+          "name": "counter",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "transports": {
+          "name": "transports",
+          "type": "blob",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "userId": {
           "name": "userId",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -53,10 +104,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "email": {
           "name": "email",

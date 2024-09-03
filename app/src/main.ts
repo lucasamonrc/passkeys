@@ -5,8 +5,8 @@ const messageDiv = document.getElementById("message") as HTMLDivElement;
 const profileDiv = document.getElementById("profile") as HTMLDivElement;
 
 // Forms
-const registrationForm = document.getElementById("signup-form") as HTMLFormElement;
-const verificationForm = document.getElementById("signin-form") as HTMLFormElement;
+const registrationForm = document.getElementById("registration") as HTMLFormElement;
+const authenticationForm = document.getElementById("authentication") as HTMLFormElement;
 
 // Form inputs
 const inputEmailSignup = document.getElementById("email-signup") as HTMLInputElement;
@@ -14,14 +14,14 @@ const inputNameSignup = document.getElementById("name-signup") as HTMLInputEleme
 const inputEmailSignin = document.getElementById("email-signin") as HTMLInputElement;
 
 // Event listeners
-verificationForm.addEventListener("submit", async (event) => {
+registrationForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const email = inputEmailSignup.value;
   const name = inputNameSignup.value;
 
   try {
-    let response = await fetch("/api/signup/start", {
+    let response = await fetch("/api/registration/start", {
       body: JSON.stringify({ email, name }),
       headers: {
         "Content-Type": "application/json",
@@ -41,7 +41,7 @@ verificationForm.addEventListener("submit", async (event) => {
 
     const registration = await startRegistration(data);
 
-    response = await fetch("/api/signup/finish", {
+    response = await fetch("/api/registration/complete", {
       body: JSON.stringify({ email, data: registration }),
       headers: {
         "Content-Type": "application/json",
@@ -62,13 +62,13 @@ verificationForm.addEventListener("submit", async (event) => {
   }
 });
 
-verificationForm.addEventListener("submit", async (event) => {
+authenticationForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const email = inputEmailSignin.value;
 
   try {
-    let response = await fetch("/api/signin/start", {
+    let response = await fetch("/api/authentication/start", {
       body: JSON.stringify({ email }),
       headers: {
         "Content-Type": "application/json",
@@ -84,7 +84,7 @@ verificationForm.addEventListener("submit", async (event) => {
 
     const authentication = await startAuthentication(data);
 
-    response = await fetch("/api/signin/finish", {
+    response = await fetch("/api/authentication/complete", {
       body: JSON.stringify({ email, data: authentication }),
       headers: {
         "Content-Type": "application/json",
@@ -111,5 +111,5 @@ verificationForm.addEventListener("submit", async (event) => {
 // Utility functions
 function clearForms() {
   registrationForm.reset();
-  verificationForm.reset();
+  authenticationForm.reset();
 }
