@@ -1,0 +1,42 @@
+{
+  "name": "passkeys",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "workspaces": [
+    "app"
+  ],
+  "scripts": {
+    "build": "npm run build:app && tsc",
+    "build:app": "cd app && npm run build",
+    "prestart": "npm run build",
+    "start": "node .",
+    "dev:server": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev:client": "cd app && npm run dev",
+    "dev": "npm run dev:server & npm run dev:client",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@simplewebauthn/browser": "^10.0.0",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.4.0",
+    "eslint": "^9.9.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2"
+  }
+}
