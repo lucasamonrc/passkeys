@@ -1,7 +1,7 @@
 import express, { urlencoded, json } from "express";
 import path from "path";
 
-const port = process.env.PORT || 3333;
+const port = process.env.PORT || 3000;
 const app = express();
 
 app.use(urlencoded({ extended: true }));

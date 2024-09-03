@@ -8,7 +8,6 @@
   "scripts": {
     "build": "npm run build:app && tsc",
     "build:app": "cd app && npm run build",
-    "prestart": "npm run build",
     "start": "node .",
     "dev:server": "ts-node-dev --respawn --transpile-only src/index.ts",
     "dev:app": "cd app && npm run dev",
