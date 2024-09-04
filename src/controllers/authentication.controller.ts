@@ -1,23 +1,24 @@
-import { eq } from "drizzle-orm";
 import {
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
-
-import { db } from "../database/connection";
-import { users, credentials, challenges } from "../database/schema";
-import constants from "../constants";
 import {
   AuthenticationResponseJSON,
   AuthenticatorTransportFuture,
 } from "@simplewebauthn/server/script/deps";
+import { eq } from "drizzle-orm";
+
+import { db } from "../database/connection";
+import { users, credentials, challenges } from "../database/schema";
+import constants from "../constants";
+import AppError from "../errors/AppError";
 
 export default {
   startAuthentication: async (email: string) => {
     const [user] = await db.select().from(users).where(eq(users.email, email));
 
     if (!user) {
-      throw new Error("Cannot authenticate this user");
+      throw new AppError("Cannot authenticate this user");
     }
 
     const passkeys = await db.select().from(credentials).where(eq(credentials.userId, user.id));
@@ -47,7 +48,7 @@ export default {
     const [user] = await db.select().from(users).where(eq(users.email, email));
 
     if (!user) {
-      throw new Error("Cannot authenticate this user");
+      throw new AppError("Cannot authenticate this user");
     }
 
     const [challenge] = await db
@@ -56,7 +57,7 @@ export default {
       .where(eq(challenges.userId, user.id));
 
     if (!challenge) {
-      throw new Error("Cannot authenticate this user");
+      throw new AppError("Cannot authenticate this user");
     }
 
     const [credential] = await db
@@ -65,7 +66,7 @@ export default {
       .where(eq(credentials.id, response.rawId));
 
     if (!credential) {
-      throw new Error("Cannot authenticate this user");
+      throw new AppError("Cannot authenticate this user");
     }
 
     const transports = credential.transports as string;
@@ -85,7 +86,7 @@ export default {
     });
 
     if (!auth.verified) {
-      throw new Error("Cannot authenticate this user");
+      throw new AppError("Cannot authenticate this user");
     }
 
     if (auth.authenticationInfo) {

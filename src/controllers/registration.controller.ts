@@ -1,23 +1,23 @@
-import { v4 as uuid } from "uuid";
-
-import { eq } from "drizzle-orm";
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
 } from "@simplewebauthn/server";
+import { isoUint8Array } from "@simplewebauthn/server/helpers";
+import { RegistrationResponseJSON } from "@simplewebauthn/server/script/deps";
+import { eq } from "drizzle-orm";
+import { v4 as uuid } from "uuid";
 
 import { db } from "../database/connection";
 import { users, credentials, challenges } from "../database/schema";
 import constants from "../constants";
-import { RegistrationResponseJSON } from "@simplewebauthn/server/script/deps";
-import { isoUint8Array } from "@simplewebauthn/server/helpers";
+import AppError from "../errors/AppError";
 
 export default {
   startRegistration: async (email: string, name: string) => {
     const [result] = await db.select().from(users).where(eq(users.email, email));
 
     if (result) {
-      throw new Error("This email is already registered");
+      throw new AppError("This email is already registered");
     }
 
     const userId = uuid();
@@ -52,7 +52,7 @@ export default {
     const [user] = await db.select().from(users).where(eq(users.email, email));
 
     if (!user) {
-      throw new Error("User not found");
+      throw new AppError("User not found", 404);
     }
 
     const [challenge] = await db
@@ -61,7 +61,7 @@ export default {
       .where(eq(challenges.userId, user.id));
 
     if (!challenge) {
-      throw new Error("This user currently has no active challenge");
+      throw new AppError("This user currently has no active challenge", 401);
     }
 
     const verification = await verifyRegistrationResponse({
@@ -90,5 +90,7 @@ export default {
         userId: user.id,
       })
       .execute();
+
+    await db.delete(challenges).where(eq(challenges.value, challenge.value)).execute();
   },
 };
