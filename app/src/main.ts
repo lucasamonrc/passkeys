@@ -112,7 +112,7 @@ window.app = {
       document.getElementById("message")!.innerHTML = "User was registered successfully!";
     },
 
-    runWebApi: async (event: SubmitEvent) => {},
+    runWebApi: async (_: SubmitEvent) => {},
   },
 
   authentication: {
@@ -140,7 +140,7 @@ window.app = {
       authEmail.value = "";
     },
 
-    runWebApi: async (event: SubmitEvent) => {},
+    runWebApi: async (_: SubmitEvent) => {},
   },
 };
 
