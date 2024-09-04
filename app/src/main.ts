@@ -1,115 +1,174 @@
 import { startRegistration, startAuthentication } from "@simplewebauthn/browser";
 
-// Output
-const messageDiv = document.getElementById("message") as HTMLDivElement;
-const profileDiv = document.getElementById("profile") as HTMLDivElement;
+interface PasskeysApp {
+  api: {
+    requestRegistrationOptions: (email: string, name: string) => Promise<any>;
+    sendRegistrationResponse: (email: string, registrationResponse: unknown) => Promise<void>;
+    requestAuthenticationOptions: (email: string) => Promise<any>;
+    sendAuthenticationResponse: (
+      email: string,
+      authenticationResponse: unknown,
+    ) => Promise<void>;
+  };
+  registration: {
+    runWithLibrary: (event: SubmitEvent) => Promise<void>;
+    runWebApi: (event: SubmitEvent) => Promise<void>;
+  };
+  authentication: {
+    runWithLibrary: (event: SubmitEvent) => Promise<void>;
+    runWebApi: (event: SubmitEvent) => Promise<void>;
+  };
+}
 
-// Forms
-const registrationForm = document.getElementById("registration") as HTMLFormElement;
-const authenticationForm = document.getElementById("authentication") as HTMLFormElement;
+declare global {
+  interface Window {
+    app: PasskeysApp;
+  }
+}
 
 // Form inputs
-const inputEmailSignup = document.getElementById("email-signup") as HTMLInputElement;
-const inputNameSignup = document.getElementById("name-signup") as HTMLInputElement;
-const inputEmailSignin = document.getElementById("email-signin") as HTMLInputElement;
+const registrationEmail = document.getElementById("registrationEmail") as HTMLInputElement;
+const registrationName = document.getElementById("registrationName") as HTMLInputElement;
+const authEmail = document.getElementById("authEmail") as HTMLInputElement;
 
-// Event listeners
-registrationForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+window.app = {
+  api: {
+    requestRegistrationOptions: async (email: string, name: string) => {
+      try {
+        return await post("/api/registration/start", { email, name });
+      } catch (error: any) {
+        console.error(error);
+        document.getElementById("message")!.innerHTML = error.message;
+      }
+    },
 
-  const email = inputEmailSignup.value;
-  const name = inputNameSignup.value;
+    sendRegistrationResponse: async (email: string, registrationResaponse: unknown) => {
+      try {
+        await post("/api/registration/complete", { email, data: registrationResaponse });
+        document.getElementById("message")!.innerHTML = "User was registered successfully!";
+      } catch (error: any) {
+        console.error(error);
+        document.getElementById("message")!.innerHTML = error.message;
+      }
+    },
 
-  try {
-    let response = await fetch("/api/registration/start", {
-      body: JSON.stringify({ email, name }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
+    requestAuthenticationOptions: async (email: string) => {
+      try {
+        return await post("/api/authentication/start", { email });
+      } catch (error: any) {
+        console.error(error);
+        document.getElementById("message")!.innerHTML = error.message;
+      }
+    },
 
-    let data = await response.json();
+    sendAuthenticationResponse: async (email: string, authenticationResponse: unknown) => {
+      try {
+        const data = await post("/api/authentication/complete", {
+          email,
+          data: authenticationResponse,
+        });
+        document.getElementById("profile")!.innerHTML = `
+            <div><strong>ID:</strong> ${data.user.id}</div>
+            <div><strong>E-mail:</strong> ${data.user.email}</div>
+            <div><strong>Name:</strong> ${data.user.name}</div>`;
+      } catch (error: any) {
+        console.error(error);
+        document.getElementById("message")!.innerHTML = error.message;
+      }
+    },
+  },
 
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
+  registration: {
+    runWithLibrary: async (event: SubmitEvent) => {
+      event.preventDefault();
 
-    data.extensions = {
-      credProps: true,
-    };
+      const email = registrationEmail.value;
+      const name = registrationName.value;
 
-    const registration = await startRegistration(data);
+      const options = await window.app.api.requestRegistrationOptions(email, name);
 
-    response = await fetch("/api/registration/complete", {
-      body: JSON.stringify({ email, data: registration }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
+      if (!options) {
+        return;
+      }
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message);
-    }
+      options.extensions = {
+        credProps: true,
+      };
 
-    clearForms();
-    messageDiv.innerHTML = "User was registered successfully!";
-  } catch (error: any) {
-    console.error(error);
-    messageDiv.innerHTML = error.message;
-  }
-});
+      let registration;
 
-authenticationForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+      try {
+        registration = await startRegistration(options);
+      } catch (error: any) {
+        console.error(error);
+        document.getElementById("message")!.innerHTML = error.message;
+      }
 
-  const email = inputEmailSignin.value;
+      await window.app.api.sendRegistrationResponse(email, registration);
 
-  try {
-    let response = await fetch("/api/authentication/start", {
-      body: JSON.stringify({ email }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
+      registrationEmail.value = "";
+      registrationName.value = "";
 
-    let data = await response.json();
+      document.getElementById("message")!.innerHTML = "User was registered successfully!";
+    },
 
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
+    runWebApi: async (event: SubmitEvent) => {},
+  },
 
-    const authentication = await startAuthentication(data);
+  authentication: {
+    runWithLibrary: async (event: SubmitEvent) => {
+      event.preventDefault();
 
-    response = await fetch("/api/authentication/complete", {
-      body: JSON.stringify({ email, data: authentication }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
-    data = await response.json();
+      const email = authEmail.value;
 
-    if (!response.ok) {
-      throw new Error(data.message);
-    }
+      const options = await window.app.api.requestAuthenticationOptions(email);
 
-    clearForms();
-    profileDiv.innerHTML = `
-        <div><strong>ID:</strong> ${data.user.id}</div>
-        <div><strong>E-mail:</strong> ${data.user.email}</div>
-        <div><strong>Name:</strong> ${data.user.name}</div>`;
-  } catch (error: any) {
-    console.error(error);
-    messageDiv.innerHTML = error.message;
-  }
-});
+      if (!options) {
+        return;
+      }
+
+      let authentication;
+      try {
+        authentication = await startAuthentication(options);
+      } catch (error: any) {
+        console.error(error);
+        document.getElementById("message")!.innerHTML = error.message;
+      }
+
+      await window.app.api.sendAuthenticationResponse(email, authentication);
+
+      authEmail.value = "";
+    },
+
+    runWebApi: async (event: SubmitEvent) => {},
+  },
+};
 
 // Utility functions
-function clearForms() {
-  registrationForm.reset();
-  authenticationForm.reset();
+function clearOutput() {
+  document.getElementById("message")!.innerHTML = "";
+  document.getElementById("profile")!.innerHTML = "";
+}
+
+async function post(url: string, payload: any) {
+  clearOutput();
+
+  const response = await fetch(url, {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message);
+  }
+
+  if (response.status === 204) {
+    return;
+  }
+
+  return await response.json();
 }

@@ -4,22 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="/src/main.ts"></script>
     <title>Passkeys</title>
   </head>
   <body class="w-full h-screen bg-gray-50 flex items-center justify-center p-4">
     <div class="max-w-screen-md w-full flex gap-x-10">
       <div class="bg-white shadow rounded-xl w-1/2 px-6 py-8 flex flex-col gap-y-6">
         <!-- Authentication Form -->
-        <form id="authentication" class="flex flex-col gap-y-4">
+        <form
+          id="authentication"
+          class="flex flex-col gap-y-4"
+          onsubmit="window.app.authentication.runWithLibrary(event)"
+        >
           <h1 class="font-bold text-lg">Sign in</h1>
 
           <div class="flex flex-col gap-2">
-            <label for="email-signin" class="text-sm font-semibold">E-mail</label>
+            <label for="authEmail" class="text-sm font-semibold">E-mail</label>
             <input
-              autocomplete="email"
               type="email"
-              name="email-signin"
-              id="email-signin"
+              id="authEmail"
               placeholder="name@mail.com"
               class="rounded border border-black p-1 text-sm"
               required
@@ -37,16 +40,18 @@
         <hr />
 
         <!-- Registration Form -->
-        <form id="registration" class="flex flex-col gap-y-4">
+        <form
+          id="registration"
+          class="flex flex-col gap-y-4"
+          onsubmit="window.app.registration.runWithLibrary(event)"
+        >
           <h1 class="font-bold text-lg">Sign up</h1>
 
           <div class="flex flex-col gap-2">
-            <label for="email-signup" class="text-sm font-semibold">E-mail</label>
+            <label for="registrationEmail" class="text-sm font-semibold">E-mail</label>
             <input
-              autocomplete="email"
               type="email"
-              name="email-signup"
-              id="email-signup"
+              id="registrationEmail"
               placeholder="name@mail.com"
               class="rounded border border-black p-1 text-sm"
               required
@@ -54,11 +59,10 @@
           </div>
 
           <div class="flex flex-col gap-2">
-            <label for="name-signup" class="text-sm font-semibold">Name</label>
+            <label for="registrationName" class="text-sm font-semibold">Name</label>
             <input
               type="text"
-              name="name-signup"
-              id="name-signup"
+              id="registrationName"
               placeholder="John Doe"
               class="rounded border border-black p-1 text-sm"
               required
@@ -80,6 +84,5 @@
         <div id="profile" class="flex flex-col gap-y-2"></div>
       </div>
     </div>
-    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
