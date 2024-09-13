@@ -32,10 +32,10 @@ export default {
       userDisplayName: name,
       timeout: 60_000,
       attestationType: "none",
-      excludeCredentials: [],
+      excludeCredentials: [], // This should be a list of existing credential IDs for that user. Prevents re-registration with the same device.
       authenticatorSelection: {
-        userVerification: "preferred",
-        residentKey: "required",
+        userVerification: "preferred", // This is required for "passkeys"
+        residentKey: "required", // This is required for "passkeys"
       },
       supportedAlgorithmIDs: [-7, -257],
     });
@@ -84,7 +84,7 @@ export default {
       .insert(credentials)
       .values({
         id: verification.registrationInfo.credentialID,
-        credentialPublicKey: verification.registrationInfo.credentialPublicKey,
+        credentialPublicKey: verification.registrationInfo.credentialPublicKey, //
         counter: verification.registrationInfo.counter,
         transports: response.response.transports,
         userId: user.id,
